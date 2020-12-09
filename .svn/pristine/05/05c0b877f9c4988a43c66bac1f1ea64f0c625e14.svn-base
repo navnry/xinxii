@@ -1,0 +1,73 @@
+<template>
+	<view class="x-cont">
+	    <view class="list-item" :class="{border: border == 1}" :style="{height:height}" @click="onClick">
+	        <view class="left">
+                <slot class="slot" name="left"></slot>
+                <text class="title">{{title}}</text>
+            </view>
+	    	<view class="right">
+	            <slot name="right"></slot>
+	    		<text :style="{color: fontColor}" v-if="msg">{{msg}}</text>
+	            <image lazy-load v-if="arrow==1" src="../../static/arrow_right2.png" mode=""></image>
+	    	</view>
+	    </view>
+	</view>
+</template>
+
+<script>
+export default {
+    props: {
+        title: {
+            type: String,
+            default: ''
+        },
+        msg: {
+            type: String,
+            default: ''
+        },
+        border: {
+            type: [String,Number],
+            default: 1
+        },
+        height: {
+            type: [String, Number],
+            default: '86rpx'
+        },
+        fontColor: {
+            type: String,
+            default: ''
+        },
+        arrow: {
+            type: [String,Number],
+            default: 1
+        }
+    },
+    data() {
+        return {
+        
+        }
+    },
+    methods: {
+        onClick () {
+            this.$emit('click')
+        }
+    }
+}
+</script>
+
+<style lang="less">
+.text-line(@num: 1) { overflow: hidden; word-break: break-all; -webkit-line-clamp: @num; -webkit-box-orient: vertical; display: -webkit-box; }
+.x-cont{padding: 0 24rpx;
+    .list-item{display: flex; height: 88rpx; align-items: center; justify-content: space-between; background-color: #fff; font-size: 32rpx; position: relative;
+        &.border{border-bottom:1rpx solid #F0F0F0;}
+        .left{display: flex; align-items: center; flex-shrink: 0; margin-right: 30rpx;flex: 1;
+			.title{.text-line()}
+		}
+        .right{display: flex; align-items: center;
+            >text{ .text-line()}
+            image{width: 14rpx; height: 24rpx; margin-left: 12rpx;}
+        }
+    }
+}
+
+</style>

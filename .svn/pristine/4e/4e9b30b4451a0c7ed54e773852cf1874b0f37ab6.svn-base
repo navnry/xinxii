@@ -1,0 +1,296 @@
+<template>
+	<view class="content">
+		<x-nav-bar leftWidth="24rpx" rightWidth="24rpx" :noBorder="true" leftIcon="none" title=" ">
+		    <view class="head" @click="call">
+		        <image src="../../static/service.png" mode="aspectFill"></image>
+		    </view>
+		</x-nav-bar>
+        <x-modal ref="modal" title="您还未登录" @sure="sure" content="是否立即去登录"></x-modal>
+        <view class="top-info">
+            <view class="top" @click="toUserInfo">
+                <view class="left">
+                    <view class="head-img">
+                        <image class="head" :src="userinfo.logo? userinfo.logo:'../../static/defalut_head.png'" mode="aspectFill"></image>
+                        <image class="head-logo" v-if="userinfo.reviewResultCode" :src="userinfo.reviewResultCode.code==5?'../../static/head_logo_end.png':'../../static/head_logo.png'" mode=""></image>
+                    </view>
+                    <view class="name-box" v-if="isLogin">
+                        <view class="name">{{userinfo.realname}}</view>
+                        <view class="platform" :class="{isBroker:userinfo.reviewResultCode.code==5}">认证平台</view>
+                    </view>
+                    <view class="name-box" v-else>
+                        <view class="name">登录</view>
+                    </view>
+                </view>
+                <image class="arrow-img" src="../../static/arrow_right1.png" mode=""></image>
+            </view>
+            <view class="info" @click="toReview()" v-if="!isLogin">
+                <view>游客</view>
+                <view>认证职业认证获取推广资格</view>
+            </view>
+           <view class="info" @click="toReview()" v-else-if="isLogin&&userinfo.reviewResultCode.code==5">
+                <view>保险经纪人</view>
+                <view>已认证，查看详情</view>
+            </view>
+            <view class="info" @click="toReview()" v-else>
+                <view>普通用户</view>
+                <view>认证职业认证获取推广资格</view>
+            </view>
+            
+        </view>
+        <view class="wallet" v-if="!isLogin" @click="toWallet">
+             <view class="tit">
+                 <text>资产明细</text>
+                 <image @click.stop="isShow = !isShow" :src="isShow ? '../../static/my_money_eye1.png':'../../static/my_money_eye.png'" mode=""></image>
+             </view>
+            <view class="list">
+                 <view class="tip">可提现（元）</view>
+                 <view class="money-box">
+                     <text class="money">****</text>
+                     <view class="btn">提现</view>
+                 </view>
+                 <view class="all-money">总收入（元）<text>****</text></view>
+             </view>
+         </view>
+       <view class="wallet" v-else-if="isLogin && assetsData" @click="openUrl('../assets/index')">
+            <view class="tit">
+                <text>资产明细</text>
+                <image @click.stop="isShow = !isShow" :src="isShow ? '../../static/my_money_eye1.png':'../../static/my_money_eye.png'" mode=""></image>
+            </view>
+           <view class="list">
+                <view class="tip">可提现（元）</view>
+                <view class="money-box">
+                    <text class="money">{{isShow?(assetsData.totalAleAmount?assetsData.totalAleAmount.toFixed(2):0.00):'****'}}</text>
+                    <view class="btn" @click.stop="openUrl('../assets/withdrawal')">提现</view>
+                </view>
+                <view class="all-money">总收入（元）<text>{{isShow?(assetsData.totalRevenue?assetsData.totalRevenue.toFixed(2):0.00):'****'}}</text></view>
+            </view>
+        </view>
+        <view class="group-order" v-if="userinfo.isExpert==1">
+            <view>
+                <image class="img1" src="../../static/order_end.png" mode=""></image>
+                <view class="txt">一大波钱正在朝你赶来</view>
+            </view>
+            <image class="img2" src="../../static/order_end_img.png" mode=""></image>
+        </view>
+        <view class="group-order" v-else>
+            <view>
+                <image class="img1" src="../../static/order_no.png" mode=""></image>
+                <view class="txt">开单奖励在等你哦！</view>
+            </view>
+            <image class="img2" src="../../static/order_no_img.png" mode=""></image>
+        </view>
+        <view class="group-list">
+            <x-list-item title="订单列表" height="94rpx" @click="toOrder">
+                <image class="left-img" slot="left" src="../../static/center_item1.png" mode=""></image>
+                <view v-if="isLogin&&assetsData" class="money" slot="right">待结算保费 ¥{{isShow?(assetsData.settlementRevenue?assetsData.settlementRevenue.toFixed(2):0.00):'****'}}</view>
+                <view v-else class="money" slot="right">待结算保费 ¥****</view>
+            </x-list-item>
+            <x-list-item title="客户管理" height="94rpx" @click="toCustomer">
+                <image class="left-img" slot="left" src="../../static/center_item2.png" mode=""></image>
+            </x-list-item>
+            <x-list-item title="我的邀请" height="94rpx" @click="toInvite">
+                <image class="left-img" slot="left" src="../../static/center_item3.png" mode=""></image>
+            </x-list-item>
+            <x-list-item title="平台资质" height="94rpx" @click="openUrl('./platinfo')">
+                <image class="left-img" slot="left" src="../../static/center_item4.png" mode=""></image>
+            </x-list-item>
+            <x-list-item title="账户设置" height="94rpx" @click="openUrl('./set')" border="0">
+                <image class="left-img last" slot="left" src="../../static/center_item5.png" mode=""></image>
+            </x-list-item>
+        </view>
+        <view class="feedback" @click="toAdvice">
+            <image src="../../static/my_feedback.png" mode=""></image>
+        </view>
+	</view>
+</template>
+
+<script>
+    import {updateUserinfo,callPhone} from '@/common/api'
+    import { mapState } from 'vuex'
+    export default {
+        data() {
+            return {
+                isShow: true,
+				code:'',
+                assetsData: null
+            }
+        },
+        computed: {
+            ...mapState(['isLogin', 'userinfo']),
+        },
+        onShow() {
+    //         if(Object.keys(this.userinfo).length > 0){
+				// updateUserinfo(this)
+    //         }
+            if(this.isLogin){
+                updateUserinfo(this)
+                this.getAssets()
+            }
+        },
+        onLoad(options) {
+            
+        },
+        methods: {
+            call(){
+                callPhone('400-996-1929')
+            },
+            toAdvice(){
+                if(!this.isLogin){
+                    // this.showModel('您还未登录','是否立即去登录？',()=>{
+                    //     this.openUrl('./login')
+                    // })
+                    this.$refs.modal.open()
+                    return
+                }
+                this.openUrl('./advice')
+            },
+            sure(){
+                this.openUrl('./login')
+            },
+            toWallet(){
+                if(!this.isLogin){
+                    this.$refs.modal.open()
+                    return
+                }
+            },
+            toCustomer(){
+                if(!this.isLogin){
+                    this.showModel('您还未登录','是否立即去登录？',()=>{
+                        this.openUrl('./login')
+                    })
+                    return
+                }
+                this.openUrl('../home/customer')
+            },
+			toReview(){
+                if(!this.isLogin){
+                    this.showModel('您还未登录','是否立即去登录？',()=>{
+                        this.openUrl('./login')
+                    })
+                    return
+                }
+				if(!this.userinfo.reviewResultCode.code){
+					this.openUrl('../join/index')
+				}else{
+					this.openUrl('../join/audit?code='+this.userinfo.reviewResultCode.code+'&reason='+this.userinfo.reviewResultCode.reason)
+				}
+			},
+            toUserInfo(){
+                if(!this.isLogin){
+                    this.openUrl('./login')
+                }else{
+                    this.openUrl('./userinfo')
+                }
+            },
+            getAssets(){
+                this.$api.get('system/withdrawal/userFund.do').then( res => {
+                    if(res.success){
+                        this.assetsData = res.data
+                    }
+                })
+            },
+            toOrder(){
+                if(!this.isLogin){
+                    this.showModel('您还未登录','是否立即去登录？',()=>{
+                        this.openUrl('./login')
+                    })
+                    return
+                }
+                if(this.userinfo.reviewResultCode.code != 5){
+                    this.showModel('您还不是经纪人','是否立即成为保险经纪人？',()=>{
+                        if(!this.userinfo.reviewResultCode.code){
+                        	this.openUrl('../join/index')
+                        }else{
+                        	this.openUrl('../join/audit?code='+this.userinfo.reviewResultCode.code+'&reason='+this.userinfo.reviewResultCode.reason)
+                        }
+                    })
+                    return
+                }
+                this.openUrl('../order/orderlist')
+            },
+            toInvite(){
+                if(!this.isLogin){
+                    this.showModel('您还未登录','是否立即去登录？',()=>{
+                        this.openUrl('./login')
+                    })
+                    return
+                }
+                if(this.userinfo.reviewResultCode.code != 5){
+                    this.showModel('您还不是经纪人','是否立即成为保险经纪人？',()=>{
+                        if(!this.userinfo.reviewResultCode.code){
+                        	this.openUrl('../join/index')
+                        }else{
+                        	this.openUrl('../join/audit?code='+this.userinfo.reviewResultCode.code+'&reason='+this.userinfo.reviewResultCode.reason)
+                        }
+                    })
+                    return
+                }
+                this.openUrl('./invite')
+            }
+        }
+    }
+</script>
+
+<style lang="less" scoped>
+.content{padding-bottom: 24rpx;}
+.head{position: relative; height: 100%;
+    image{width: 44rpx; height: 44rpx; position: absolute; top: 50%; transform: translateY(-50%); right: 0;}
+}
+.top-info{height: 256rpx; background-color: #fff; padding: 0 24rpx; position: relative;
+    .top{display: flex; align-items: center;
+        .left{flex-grow: 1; display: flex; align-items: center;
+            .head-img{width: 120rpx; height: 120rpx; border-radius: 50%; position: relative; background-color: #f5f5f5;
+               .head{border-radius: 50%; width: 100rpx; height: 100rpx; position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%);} 
+               .head-logo{ width: 30rpx; height: 28rpx; position: absolute; right: 10rpx; bottom: 4rpx;}
+            }
+            .name-box{display: flex; align-items: center;
+                .name{font-size: 40rpx; font-weight: bold; margin: 0 16rpx 0 38rpx;}
+                .platform{height: 40rpx; background-color: #999; line-height: 40rpx; font-size: 24rpx; color: #fff; padding: 0 12rpx; border-radius: 8rpx;
+                    &.isBroker{background: #FF5000;}
+                }
+            }
+        }
+        .arrow-img{width: 36rpx; height: 36rpx;}
+    }
+    .info{position: absolute; bottom: 0; width: 702rpx; height: 88rpx; background-color: #222525; border-radius: 12rpx 12rpx 0 0; color: #FEA748; font-size: 28rpx; display: flex; align-items: center; justify-content: space-between; padding: 0 24rpx;}
+}
+.wallet{margin: 24rpx auto 0; width: 702rpx; border-radius: 12rpx; background-color: #fff; padding: 24rpx; background: url('../../static/center_wallet_bg.png'); background-size: 100% 100%;
+    .tit{font-size: 32rpx; font-weight: bold; font-size: 0; display: flex; align-items: center;
+        text{font-size: 32rpx; margin-right: 12rpx;}
+        image{width: 32rpx; height: 18rpx;}
+    }
+    .list{
+        .tip{font-size: 28rpx; margin: 24rpx 0;}
+        .money-box{display: flex; justify-content: space-between; align-items: center;
+            .money{font-size: 64rpx; font-weight: bold; line-height: 64rpx;}
+            .btn{width: 160rpx; height: 64rpx; text-align: center; line-height: 64rpx; background-color: #ff5000; color: #fff; font-size: 32rpx; font-weight: bold; border-radius: 32rpx;}
+        }
+        .all-money{margin-top: 24rpx; font-size: 28rpx;
+            >text{margin-left: 12rpx; font-size: 36rpx; font-weight: bold;}
+        }
+    }
+}
+.group-order{margin: 24rpx auto 0; width: 702rpx; height: 86rpx; font-size: 0; border-radius: 12rpx; display: flex; align-items: center; justify-content: space-between; background: #fff; padding: 0 24rpx;
+    >view{flex-grow: 1; font-size: 28rpx; font-weight: bold; display: flex; align-items: center;}
+    .img1{width: 94rpx; height: 26rpx; margin-right: 24rpx;}
+    .img2{width: 132rpx; height: 52rpx; flex-shrink: 0;}
+}
+.feedback{font-size: 0; margin: 24rpx auto 0; width: 702rpx;
+    image{width: 100%; height: 200rpx;}
+}
+.order-box{margin: 24rpx auto 0; width: 702rpx; border-radius: 12rpx; background-color: #fff; padding: 24rpx;
+    .tit{font-size: 32rpx; font-weight: bold;}
+    .list{display: flex; justify-content: space-between;
+        .item{text-align: center; font-size: 0;
+            image{width: 60rpx; height: 60rpx; margin-top: 24rpx;}
+            .txt{color: #666; font-size: 28rpx; line-height: 40rpx; margin-top: 12rpx;}
+        }
+    }
+}
+.group-list{margin: 24rpx auto 0; width: 702rpx; border-radius: 12rpx; background-color: #fff;
+    .left-img{width: 40rpx; height: 40rpx; margin-right: 24rpx;
+        &.last{width: 36rpx; margin-right: 28rpx;}
+    }
+    .money{color: #ff5000; font-size: 28rpx;}
+}
+</style>

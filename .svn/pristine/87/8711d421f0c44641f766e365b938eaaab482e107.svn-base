@@ -1,0 +1,68 @@
+<script>
+    import { getConigInfo, openUrl} from '@/common/api'
+	export default {
+		onLaunch: function() {
+			console.log('App Launch')
+            let userinfo = uni.getStorageSync('userinfo')
+			console.log(userinfo);
+            if (userinfo) {
+                this.$store.commit('LOGIN', {userinfo})
+            }
+            let authinfo = uni.getStorageSync('authinfo')
+            if(authinfo){
+                this.$store.commit('WXLOGIN',{authinfo})
+            }
+            // let idInfoCache = uni.getStorageSync('idInfoCache')
+            // if(idInfoCache){
+            //     this.$store.commit('SET_IDINFO_CACHE',{idInfoCache})
+            // }
+            let statusBarHeight = uni.getSystemInfoSync().statusBarHeight
+            this.$store.commit('SET_STATUS_BAR_HEIGHT', statusBarHeight)
+            let configinfo = uni.getStorageSync('configinfo')
+            this.$store.commit('SET_CONFIGINFO', configinfo)
+            let configSuccess = false
+            getConigInfo(this, null, () => {
+              configSuccess = true
+            })
+            uni.onNetworkStatusChange((res) => {
+              if (res.isConnected && !configSuccess) {
+                getConigInfo(this)
+              }
+            })
+            
+            // #ifdef APP-PLUS
+            // const bloomAd = uni.requireNativePlugin('Bloom-AD')
+            // bloomAd.setup({
+            //     appId: 'ba0063bfbc1a5ad878',
+            //     userId: 'uid',	// 用户 id
+            //     multiProcess: false, // 是否多进程，默认 false
+            //     debug: true // 是否调试模式，默认 false，请至少运行一次调试模式
+            // })
+            // bloomAd.setMinSplashInterval(3 * 60 * 1000)
+            // 检测更新app
+            // checkUpdateApp(this)
+            // #endif
+		},
+		onShow: function() {
+			console.log('App Show')
+            this.$store.commit('SET_APP_STATUS', true)
+		},
+		onHide: function() {
+			console.log('App Hide')
+            this.$store.commit('SET_APP_STATUS', false)
+		}
+	}
+</script>
+
+<style>
+	view, text, button, navigator, scroll-view, label, textarea, image, input{padding: 0; margin: 0; box-sizing: border-box; font-family:PingFangSC-Regular,PingFang SC;}
+	.status_bar {height: var(--status-bar-height); width: 100%;}
+	button:after{border: none;}
+	page{background-color: #F6F7F8; color: #333;}
+    /* swiper样式修改 */
+    uni-swiper .uni-swiper-dot{width: 56rpx; height: 6rpx;}
+    uni-swiper .uni-swiper-dots-horizontal .uni-swiper-dot{ margin-right: 8rpx; border-radius: 0;}
+    .uni-picker-container .uni-picker-action.uni-picker-action-confirm{color: #FF5000 !important;}
+	/*每个页面公共css */
+	.mask{position: fixed; height: 100%; width: 100%; background-color: #000; opacity: .5; z-index: 89; left: 0; top: 0;}
+</style>

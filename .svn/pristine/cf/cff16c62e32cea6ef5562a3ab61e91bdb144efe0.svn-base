@@ -1,0 +1,415 @@
+<!-- 妈咪保贝少儿重大疾病保险 -->
+<template>
+	<view class="content">
+		<x-nav-bar no-border title="保费试算"></x-nav-bar>
+		<view class="info">
+			<view class="info-box">
+				<view class="info-box-title"><text>投保人信息</text></view>
+				<m-list-item title="投保人出生日期" tips="注：18-60周岁（含18、60周岁）">
+					<picker slot="right" mode="date" :start="insureStartDate" :end="insureEndDate" :value="insureBirth"
+					 @change="bindInsureDateChange">
+						<view class="date-view">{{insureBirth}}</view>
+					</picker>
+				</m-list-item>
+				<m-radiobox ref="policyholderGander" @change="setPolicyholderGander"></m-radiobox>
+			</view>
+			
+			<view class="info-box">
+				<view class="info-box-title"><text>被保人信息</text></view>
+				<m-list-item title="被保人出生日期" tips="注：30天-17周岁（含30天、17周岁）">
+					<picker slot="right" mode="date" :start="insuredStartDate" :end="insuredEndDate" :value="insuredBirth"
+					 @change="bindInsuredDateChange">
+						<view class="date-view">{{insuredBirth}}</view>
+					</picker>
+				</m-list-item>
+				<m-radiobox ref="gander" @change="setGander"></m-radiobox>
+			</view>
+			
+			<view class="info-box">
+				<view class="info-box-title"><text>投保方案</text></view>
+				<m-radiobox ref="indemnityAmount" @change="setIndemnityAmount"></m-radiobox>
+				<m-radiobox ref="guaranteePeriod" @change="setGuaranteePeriod"></m-radiobox>
+				<m-radiobox ref="paymentType" @change="setPaymentType"></m-radiobox>
+				<m-radiobox ref="paymentPeriod" @change="setPaymentPeriod"></m-radiobox>
+				<m-radiobox ref="disease" @change="setDisease"></m-radiobox>
+				<m-radiobox ref="secDisease" @change="setSecDisease"></m-radiobox>
+				<m-radiobox ref="exemptType" @change="setExemptType"></m-radiobox>
+			</view>
+		</view>
+		
+		<view class="reckon">
+			<view class="reckon-wrap">
+				<view class="price">
+					<text>{{resultPrice}}</text>
+					<text class="sec-text">元/年</text>
+				</view>
+				<view class="btn">
+					<button type="default" @click="toPay(detail.insuranceLink)">立即投保</button>
+				</view>
+			</view>
+		</view>
+	</view>
+</template>
+
+<script>
+	import mRadiobox from "@/components/m-radiobox/m-radiobox.vue"
+	import {formatTime,getAge,setStartTime,setEndTime} from '../../common/utils/index.js'
+	export default {
+		components: {
+		   mRadiobox
+		},
+		data() {
+			return {
+				
+				detail:{},
+				planArr:[],//计划数组，用于判断是什么计划
+				resultPrice:'— — —',
+				
+				//投保人
+				insureBirth: '请选择',
+				insureStartDate: '',
+				insureEndDate: '',
+				
+				//被保人
+				insuredBirth: '请选择',
+				insuredStartDate: '',
+				insuredEndDate: '',
+				
+				
+				policyholderGander:{
+					name: '投保人性别',
+					list: [{name: "男",value: 1,checked: 0,show:true,disabled:false}, {name: "女",value: 0,checked: 0,show:true,disabled:false}]
+				},
+				gander:{
+					name: '被保人性别',
+					list: [{name: "男",value: 1,checked: 0,show:true,disabled:false}, {name: "女",value: 0,checked: 0,show:true,disabled:false}]
+				},
+				indemnityAmount:{
+					name: '基本保额',
+					list: [{name: '10万',value: 100000,show: true,disabled:false}, {name: '20万',value: 200000,show: true,disabled:false}, {name: '30万',value: 300000,show: true,disabled:false}, {name: '40万',value: 400000,show: true,disabled:false}, {name: '50万',value: 500000,show: true,disabled:false}, {name: '60万',value: 600000,show: true,disabled:false}]
+				},
+				guaranteePeriod:{
+					name: '保障期间',
+					list: [{name: '20年',value: '20',show: true,disabled:false}, {name: '25年',value: '25',show: true,disabled:false}, {name: '30年',value: '30',show: true,disabled:false}, {name: '至70岁',value: 'T70',show: true,disabled:false}, {name: '至80岁',value: 'T80',show: true,disabled:false}, {name: '终身',value: 'WL',show: true,disabled:false}]
+				},
+				paymentType:{
+					name: '缴费类型',
+					list: [{name: '年交',value: 'NJ',show: true,disabled:false}]
+				},
+				paymentPeriod:{
+					name: '缴费年限',
+					list: [{name: '5年',value: '5',show: true,disabled:false}, {name: '10年',value: '10',show: true,disabled:false}, {name: '15年',value: '15',show: true,disabled:false}, {name: '20年',value: '20',show: true,disabled:false}, {name: '30年',value: '30',show: true,disabled:false}]
+				},
+				disease:{
+					name: '特定少儿疾病及罕见病',
+					list: [{name: '不含',value: '0',show: true,disabled:false}, {name: '含',value: '1',show: true,disabled:false}]
+				},
+				secDisease:{
+					name: '第二次重大疾病',
+					list: [{name: '不含',value: '0',show: true,disabled:false}, {name: '含',value: '1',show: true,disabled:false}]
+				},
+				exemptType:{
+					name: '投保人豁免',
+					list: [{name: '不含',value: '0',show: true,disabled:false}, {name: '含',value: '1',show: true,disabled:false}]
+				},
+				
+				sendData: {
+					indemnityAmount: 300000, //基本保额
+					gander: '', //被保人性别
+					age: '', //被保人年龄
+					paymentPeriod: '', //交费期限(年)
+					guaranteePeriod: '', //保障期
+					planCode: '', //计划代码
+					productCode: '', //产品代码
+					companyCode: '', //公司代码
+					exemptType: '', //豁免类型 1:被保人豁免 2：投保人豁免 空则是无豁免
+					trialType: 'Client', //保费试算类型(1.Api; 2.Client)
+					policyholderAge: '', //投保人年龄
+					policyholderGander: '', //投保人性别
+					rateType:'',
+					isSocial:'' //是否有医保
+				}
+			}
+		},
+		mounted(){
+			this.$refs.policyholderGander.set({
+				type:'radio',			
+				title:this.policyholderGander.name,
+				index:-1,				
+				column:2,				
+				list:this.policyholderGander.list	
+			});
+			this.$refs.gander.set({
+				type:'radio',			
+				title:this.gander.name,
+				index:-1,				
+				column:2,				
+				list:this.gander.list	
+			});
+			// indemnityAmount
+			this.$refs.indemnityAmount.set({
+				type:'radio',			
+				title:this.indemnityAmount.name,
+				index:-1,				
+				column:3,				
+				list:this.indemnityAmount.list	
+			});
+			this.$refs.guaranteePeriod.set({
+				type:'radio',			
+				title:this.guaranteePeriod.name,
+				index:-1,				
+				column:3,				
+				list:this.guaranteePeriod.list	
+			});
+			// paymentType
+			this.$refs.paymentType.set({
+				type:'radio',			
+				title:this.paymentType.name,
+				index:-1,				
+				column:2,				
+				list:this.paymentType.list	
+			});
+			this.$refs.paymentPeriod.set({
+				type:'radio',			
+				title:this.paymentPeriod.name,
+				index:-1,				
+				column:3,				
+				list:this.paymentPeriod.list	
+			});
+			
+			this.$refs.disease.set({
+				type:'radio',			
+				title:this.disease.name,
+				index:-1,				
+				column:2,				
+				list:this.disease.list	
+			});
+			
+			this.$refs.secDisease.set({
+				type:'radio',			
+				title:this.secDisease.name,
+				index:-1,				
+				column:2,				
+				list:this.secDisease.list	
+			});
+			
+			this.$refs.exemptType.set({
+				type:'radio',			
+				title:this.exemptType.name,
+				index:-1,				
+				column:2,				
+				list:this.exemptType.list	
+			});
+		},
+		onLoad(option) {
+			this.insureStartDate = setStartTime(60) //投保人最大年龄60限制
+			this.insureEndDate = setEndTime(18) //投保人最小年龄限制
+			this.insuredStartDate = setStartTime(17) //被保人最大年龄限制
+			this.insuredEndDate = setEndTime(30,'days') //被保人最小年龄限制
+			
+			let data = JSON.parse(decodeURIComponent(option.data))
+			this.detail = data
+			this.sendData.productCode = data.serialNumber
+			this.sendData.companyCode = data.producerCode
+			this.sendData.trialType = data.trialType
+			this.sendData.rateType = data.rateType
+			
+		},
+		methods: {
+			getAmount(){/*从后台获取匹配结果*/
+				this.resultPrice = '— — —'
+				this.$api.post('pdc/product/premium.do',this.sendData).then(res=>{
+					console.log(res)
+					
+					if(res.success){
+						this.resultPrice = res.data.toFixed(2)
+					}
+				}).catch(err=>{
+					console.log(err)
+				})
+			},
+			judgePlanCode(){/*计划类型*/
+				switch (this.planArr.toString()) {
+					case [0, 0].toString():
+						this.sendData.planCode = 1
+						break;
+					case [1, 0].toString():
+						this.sendData.planCode = 2
+						break;
+					case [0, 1].toString():
+						this.sendData.planCode = 3
+						break;
+					case [1, 1].toString():
+						this.sendData.planCode = 4
+						break;
+					default:
+				
+				}
+			},
+			bindInsureDateChange(e){
+				let insureAge = getAge(e.target.value)
+				this.insureBirth = e.target.value
+				this.sendData.policyholderAge = insureAge
+				this.exemptType.list.map(item => {
+					if (insureAge > 50) {
+						item.value == '1' ? item.disabled = true : item.disabled = false
+					} else {
+						item.disabled = false
+					}
+				})
+				this.paymentPeriod.list.map(item => {
+					let mAmount = Number(insureAge) + Number(item.value)
+					mAmount <= 70 ? item.disabled = false : item.disabled = true
+				})
+				this.getAmount()
+			},
+			setPolicyholderGander(data){
+				console.log('投保人性别'+data.value) 
+				this.sendData.policyholderGander = data.value
+				this.getAmount()
+			},
+			
+			bindInsuredDateChange(e) { //被保人年龄限制、保费区间
+				let insuredAge = getAge(e.target.value)
+				console.log(insuredAge)
+				this.insuredBirth = e.target.value
+				this.sendData.age = insuredAge
+				this.indemnityAmount.list.map(item => {
+					if (insuredAge <= 3) {
+						item.value == '400000' || item.value == '500000' || item.value == '600000' ? 
+						item.disabled = true : item.disabled = false
+					} else if (insuredAge >= 4 && insuredAge <= 5) {
+						item.value == '600000' ? 
+						item.disabled = true : item.disabled = false
+					} else {
+						item.disabled = false
+					}
+				})
+				this.getAmount()
+			},
+			
+			setGander(data){
+				console.log('被保人性别'+data.value) 
+				this.sendData.gander = data.value
+				this.getAmount()
+			},
+			setIndemnityAmount(data){
+				console.log('基本保额'+ data.value) 
+				let val = data.value
+				if(val > 500000){
+					this.insuredEndDate = setEndTime(6)
+				}else if(val > 300000){
+					this.insuredEndDate = setEndTime(4)
+				}else{
+					this.insuredEndDate = setEndTime(30,'days')
+				}
+				this.sendData.indemnityAmount = val
+				this.getAmount()
+			},
+			setGuaranteePeriod(data){
+				console.log('保障期间'+data.value) 
+				let val = data.value
+				this.paymentPeriod.list.map(item => { //保障期间控制缴费年限&&保障年龄
+					switch(val){
+						case '20':
+							item.value == '15' || item.value == '20' || item.value == '30' ?
+							item.disabled = true : item.disabled = false
+						break;
+						case '25':
+							item.value == '20' || item.value == '30' ?
+							item.disabled = true : item.disabled = false
+						break;
+						case '30':
+							item.value == '30' ?
+							item.disabled = true : item.disabled = false
+						break;
+						default:
+						item.disabled = false
+					}
+				})
+				this.sendData.guaranteePeriod = val
+				this.getAmount()
+			},
+			setPaymentType(data){
+				console.log('缴费类型'+data.value) 
+				// let val = data.val
+				this.getAmount()
+			},
+			setPaymentPeriod(data){
+				console.log('缴费年限'+data.value) 
+				let val = data.value
+				this.guaranteePeriod.list.map(item => { //缴费年限控制保障期间&&保障年龄
+					switch(val){
+						case '30':
+							item.value == '30' || item.value == '25' || item.value == '20' ?
+							item.disabled = true : item.disabled = false
+						break;
+						case '20':
+							item.value == '25' || item.value == '20' ?
+							item.disabled = true : item.disabled = false
+						break;
+						case '15':
+							item.value == '20' ?
+							item.disabled = true : item.disabled = false
+						break;
+						default:
+							item.disabled = false
+					}
+				
+				})
+				
+				this.sendData.paymentPeriod = val
+				this.getAmount()
+			},
+			
+			setDisease(data){
+				console.log('特定少儿疾病及罕见病'+data.value) 
+				let val = data.value
+				val == '0' ? this.planArr[0] = 0 : this.planArr[0] = 1
+				this.judgePlanCode()
+				this.getAmount()
+			},
+			setSecDisease(data){
+				console.log('第二次重大疾病'+data.value) 
+				let val = data.value
+				val == '0' ? this.planArr[1] = 0 : this.planArr[1] = 1
+				this.judgePlanCode()
+				this.getAmount()
+			},
+			setExemptType(data){
+				console.log('投保人豁免'+data.value) 
+				let val = data.value
+				if (val !== '0') {
+					this.sendData.exemptType = 2
+					this.insureStartDate = setStartTime(50)
+				} else {
+					this.sendData.exemptType = ''
+					this.insureStartDate = setStartTime(60)
+				}
+				this.getAmount()
+			}
+		}
+	}
+</script>
+
+<style lang="scss">
+	.content{padding: 0 24rpx 170rpx;}
+	.info-box{padding: 24rpx;
+		background-color: #FFFFFF;margin-top: 24rpx;border-radius: 12rpx;
+		.x-cont{padding: 0;}
+		.info-box-title{position: relative;display: flex;align-items: center;margin-bottom: 48rpx;
+			&::before{content: "";display: block;width: 6rpx;height: 34rpx;background: #FF5000;border-radius: 3rpx;margin-right: 8rpx;}
+			>text{font-size: 36rpx;font-weight: 500;line-height: 50rpx;}
+		}
+	}
+	.reckon{position: fixed;bottom: 0;left: 0;;width: 100%;height: 120rpx;background: #FFFFFF;border-top: 2rpx solid #EBEDF0;padding: 16rpx 24rpx;
+		.reckon-wrap{display: flex;align-items: center;justify-content: space-between;
+			.price{flex: 1;margin-right: 24rpx;color: #FF5000;font-size: 48rpx;
+				.sec-text{font-size: 28rpx;font-weight: 400;line-height: 40rpx;margin-left: 4rpx;}
+			}
+			.btn{
+				button{width: 232rpx;height: 88rpx;background: #FF5000;border-radius: 6rpx;font-size: 34rpx;font-weight: 500;color: #FFFFFF;line-height: 88rpx;}
+			}
+		}
+	}
+</style>

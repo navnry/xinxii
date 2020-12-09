@@ -1,0 +1,499 @@
+{
+	"pages": [ //pages数组中第一项表示应用启动页，参考：https://uniapp.dcloud.io/collocation/pages
+		{
+            "path": "pages/welcome/index",
+            "style": {
+                "navigationBarTitleText": "欢迎页",
+                "app-plus": {
+                    "titleNView": false
+                }
+            }
+        },
+		{
+            "path": "pages/home/index",
+            "style": {
+                "navigationBarTitleText": "首页"
+            }
+        },
+        {
+            "path": "pages/home/friends",
+            "style": {
+                "navigationBarTitleText": "朋友圈"
+            }
+        },
+        {
+            "path": "pages/home/allbanner",
+            "style": {
+                "navigationBarTitleText": "全部海报"
+            }
+        },
+        {
+            "path": "pages/home/sign",
+            "style": {
+                "navigationBarTitleText": "签到"
+            }
+        },
+        {
+            "path": "pages/home/signbanner",
+            "style": {
+                "navigationBarTitleText": "日签海报"
+            }
+        },
+        {
+            "path": "pages/home/searchreslut",
+            "style": {
+                "navigationBarTitleText": "搜索"
+            }
+        },
+        {
+            "path": "pages/home/poster",
+            "style": {
+                "navigationBarTitleText": "海报"
+            }
+        },
+        {
+            "path" : "pages/home/start",
+            "style" : {
+        		 "navigationBarTitleText": "今日之星"
+        	}
+        },
+        {
+            "path" : "pages/home/startlist",
+            "style" : {
+            	 "navigationBarTitleText": "往期回顾"
+            }
+        },
+        {
+            "path" : "pages/home/customer",
+            "style" : {
+            	 "navigationBarTitleText": "客户管理"
+            }
+        },
+        {
+            "path" : "pages/home/addcustomer",
+            "style" : {
+            	 "navigationBarTitleText": "添加客户"
+            }
+        },
+        {
+            "path" : "pages/home/customerinfo",
+            "style" : {
+            	 "navigationBarTitleText": "客户信息"
+            }
+        },
+        {
+            "path" : "pages/home/starproduct",
+            "style" : {
+                 "navigationBarTitleText": "明星产品专区"
+            }
+        },
+        {
+            "path" : "pages/home/training",
+            "style" : {
+                 "navigationBarTitleText": "精英训练营"
+            }
+        },
+        {
+            "path": "pages/message/index",
+            "style": {
+                "navigationBarTitleText": "消息中心"
+            }
+        },
+        {
+            "path": "pages/message/productstatus",
+            "style": {
+                "navigationBarTitleText": "产品动态"
+            }
+        },
+        {
+            "path": "pages/message/systemnotice",
+            "style": {
+                "navigationBarTitleText": "系统通知"
+            }
+        },
+        {
+            "path": "pages/message/productnotice",
+            "style": {
+                "navigationBarTitleText": "产品通知"
+            }
+        },
+        {
+            "path": "pages/message/marketing",
+            "style": {
+                "navigationBarTitleText": "营销活动"
+            }
+        },
+        {
+            "path": "pages/message/orderinfo",
+            "style": {
+                "navigationBarTitleText": "订单信息"
+            }
+        },
+        {
+            "path" : "pages/assets/index",
+            "style" : {
+                "navigationBarTitleText": "我的资产"
+            }
+        },
+        {
+            "path" : "pages/assets/bankcard",
+            "style" : {
+                "navigationBarTitleText": "银行卡"
+            }
+        },
+        {
+            "path" : "pages/assets/addbankcard",
+            "style" : {
+                "navigationBarTitleText": "添加银行卡"
+            }
+        },
+        {
+            "path" : "pages/assets/selmoneyaccount",
+            "style" : {
+                "navigationBarTitleText": "选择收款账户"
+            }
+        },
+        {
+            "path" : "pages/assets/withdrawal",
+            "style" : {
+                "navigationBarTitleText": "提现"
+            }
+        },
+        {
+            "path" : "pages/assets/withdrawalrecord",
+            "style" : {
+                "navigationBarTitleText": "提现记录"
+            }
+        },
+        {
+            "path" : "pages/assets/moneylist",
+            "style" : {
+                "navigationBarTitleText": "资金明细"
+            }
+        },
+        {
+            "path" : "pages/assets/moneydetail",
+            "style" : {
+                "navigationBarTitleText": "资金具体明细"
+            }
+        },
+        {
+            "path" : "pages/assets/withdrawaldetail",
+            "style" : {
+                "navigationBarTitleText": "提现具体明细"
+            }
+        },
+        {
+            "path": "pages/test/selpicker",
+            "style": {
+                "navigationBarTitleText": "多级联动"
+            }
+        },{
+            "path": "pages/test/fold",
+            "style": {
+                "navigationBarTitleText": "折叠"
+            }
+        },
+        {
+            "path": "pages/product/index",
+            "style": {
+                "navigationBarTitleText": "产品库"
+            }
+        },
+        {
+            "path": "pages/product/detail",
+            "style": {
+                "navigationBarTitleText": "详情"
+            }
+        },
+        {
+            "path": "pages/product/search",
+            "style": {
+                "navigationBarTitleText": "产品搜索"
+            }
+        },
+        {
+            "path": "pages/product/safedetail",
+            "style": {
+                "navigationBarTitleText": "保障详情"
+            }
+        },
+        {
+            "path": "pages/train/index",
+            "style": {
+                "navigationBarTitleText": "知识课堂"
+            }
+        },
+        {
+            "path": "pages/train/detail",
+            "style": {
+                "navigationBarTitleText": "详情"
+            }
+        },
+        {
+            "path": "pages/train/list",
+            "style": {
+                "navigationBarTitleText": "近期回顾"
+            }
+        },
+        {
+            "path": "pages/train/search",
+            "style": {
+                "navigationBarTitleText": "知识课堂搜索"
+            }
+        },
+        {
+            "path": "pages/join/index",
+            "style": {
+                "navigationBarTitleText": "加入新禧"
+            }
+        },
+        {
+            "path": "pages/join/identity",
+            "style": {
+                "navigationBarTitleText": "身份认证"
+            }
+        },
+        {
+            "path": "pages/join/fillmsg",
+            "style": {
+                "navigationBarTitleText": "填写信息"
+            }
+        },
+        {
+            "path": "pages/join/audit",
+            "style": {
+                "navigationBarTitleText": "人工审核"
+            }
+        },
+        {
+            "path": "pages/join/certificate",
+            "style": {
+                "navigationBarTitleText": "职业资质证"
+            }
+        },
+        {
+            "path": "pages/join/datareplenish",
+            "style": {
+                "navigationBarTitleText": "资料补充"
+            }
+        },
+        {
+            "path": "pages/join/homejoin",
+            "style": {
+                "navigationBarTitleText": "加入新禧"
+            }
+        },
+        
+        {
+            "path" : "pages/my/index",
+            "style" : {
+                "navigationBarTitleText": "我的"
+            }
+        },
+        {
+            "path" : "pages/my/login",
+            "style" : {
+                "navigationBarTitleText": "登录"
+            }
+        },
+        {
+            "path" : "pages/my/register",
+            "style" : {
+                "navigationBarTitleText": "注册"
+            }
+        },
+        {
+            "path" : "pages/my/registerend",
+            "style" : {
+                "navigationBarTitleText": "注册成功"
+            }
+        },
+        {
+            "path" : "pages/my/webview",
+            "style" : {
+                "navigationBarTitleText": "禧小保"
+            }
+        },
+        {
+            "path" : "pages/my/userinfo",
+            "style" : {
+                "navigationBarTitleText": "个人信息"
+            }
+        },
+        {
+            "path" : "pages/my/set",
+            "style" : {
+                "navigationBarTitleText": "设置"
+            }
+        },
+        {
+            "path" : "pages/my/invite",
+            "style" : {
+                "navigationBarTitleText": "我的邀请"
+            }
+        },
+        {
+            "path" : "pages/my/plan",
+            "style" : {
+                "navigationBarTitleText": "历史计划书"
+            }
+        },
+        {
+            "path" : "pages/my/platinfo",
+            "style" : {
+                "navigationBarTitleText": "平台资质"
+            }
+        },
+        {
+            "path" : "pages/my/wxlogin",
+            "style" : {
+                "navigationBarTitleText": "微信授权"
+            }
+        },
+        {
+            "path" : "pages/my/editusername",
+            "style" : {
+                "navigationBarTitleText": "修改用户名"
+            }
+        },
+        {
+            "path" : "pages/my/attestation",
+            "style" : {
+                "navigationBarTitleText": "推广认证"
+            }
+        },
+        {
+            "path" : "pages/my/editpwd",
+            "style" : {
+                "navigationBarTitleText": "修改密码"
+            }
+        },
+        {
+            "path" : "pages/my/editphone",
+            "style" : {
+                "navigationBarTitleText": "修改手机号"
+            }
+        },
+        {
+            "path" : "pages/my/editdealpwd",
+            "style" : {
+                "navigationBarTitleText": "提现密码"
+            }
+        },
+        {
+            "path" : "pages/my/bindmail",
+            "style" : {
+                "navigationBarTitleText": "绑定邮箱"
+            }
+        },
+        {
+            "path" : "pages/my/bindphone",
+            "style" : {
+                "navigationBarTitleText": "绑定手机号"
+            }
+        },
+        {
+            "path" : "pages/my/advice",
+            "style" : {
+                "navigationBarTitleText": "反馈与建议"
+            }
+        },
+        {
+            "path" : "pages/my/rule",
+            "style" : {
+                "navigationBarTitleText": "协议和规则"
+            }
+        },
+        {
+            "path" : "pages/my/public",
+            "style" : {
+                "navigationBarTitleText": "新禧公众号"
+            }
+        },
+        {
+            "path" : "pages/order/orderlist",
+            "style" : {
+                "navigationBarTitleText": "订单列表"
+            }
+        },
+        {
+            "path" : "pages/order/orderdetail",
+            "style" : {
+                "navigationBarTitleText": "保单详情"
+            }
+        },
+        {
+            "path": "pages/thenewagent/index",
+            "style": {
+                "navigationBarTitleText": "新代理人专享"
+            }
+        },
+        {
+            "path": "pages/ebook/userdeal",
+            "style": {
+                "navigationBarTitleText": "用户协议"
+            }
+        },
+        {
+            "path": "pages/ebook/privacypolicy",
+            "style": {
+                "navigationBarTitleText": "隐私政策"
+            }
+        },
+        {
+            "path": "pages/ebook/productnotify",
+            "style": {
+                "navigationBarTitleText": "产品告知书"
+            }
+        }
+    ],
+    "tabBar": {
+    "color": "#999999",
+    "selectedColor": "#FF5000",
+    "backgroundColor": "#ffffff",
+    "list": [
+        {
+            "pagePath": "pages/home/index",
+            "text": "首页",
+            "iconPath": "static/icon_a_1.png",
+            "selectedIconPath": "static/icon_a.png"
+        },
+        {
+            "pagePath": "pages/product/index",
+            "text": "产品库",
+            "iconPath": "static/icon_b_1.png",
+            "selectedIconPath": "static/icon_b.png"
+        },
+        {
+            "pagePath": "pages/train/index",
+            "text": "知识课堂",
+            "iconPath": "static/icon_c_1.png",
+            "selectedIconPath": "static/icon_c.png"
+        },
+        {
+            "pagePath": "pages/my/index",
+            "text": "我的",
+            "iconPath": "static/icon_d_1.png",
+            "selectedIconPath": "static/icon_d.png"
+        }
+    ]
+    },
+    "globalStyle": {
+        "navigationBarTextStyle": "black",
+        "navigationBarTitleText": "test",
+        "navigationBarBackgroundColor": "#FFFFFF",
+        "backgroundColor": "#F3F3F3",
+        "navigationStyle": "custom"
+    },
+    "condition" : { //模式配置，仅开发期间生效
+        "current": 0, //当前激活的模式(list 的索引项)
+        "list": [
+            {
+                "name": "首页",
+                "path": "pages/home/index",
+                "query": ""
+            }
+        ]
+    }
+}

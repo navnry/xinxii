@@ -1,0 +1,143 @@
+@font-face {font-family: "iconfont";
+  src: url('iconfont.ttf') format('truetype'); /* iOS 4.1- */
+}
+
+.icon {
+  font-family: "iconfont" !important;
+  font-size: 48rpx;
+  font-weight: normal;
+  font-style: normal;
+  line-height: 1;
+  display: inline-block;
+  text-decoration: none;
+  vertical-align: middle;
+  -webkit-font-smoothing: antialiased;
+}
+
+.icon-right:before {
+  content: "\e619";
+}
+
+.icon-play:before {
+  content: "\e616";
+}
+
+.icon-pause:before {
+  content: "\e617";
+}
+
+.icon-notepad:before {
+  content: "\e634";
+}
+
+.icon-signin:before {
+  content: "\e606";
+}
+
+.icon-close1:before {
+  content: "\e620";
+}
+
+.icon-weixin1:before {
+  content: "\e63b";
+}
+
+.icon-star2:before {
+  content: "\e605";
+}
+
+.icon-help:before {
+  content: "\e69f";
+}
+
+.icon-favorite:before {
+  content: "\e600";
+}
+
+.icon-share:before {
+  content: "\e693";
+}
+
+.icon-alipay:before {
+  content: "\e612";
+}
+
+.icon-weixin:before {
+  content: "\ea7d";
+}
+
+.icon-phone:before {
+  content: "\e613";
+}
+
+.icon-safe:before {
+  content: "\e8dc";
+}
+
+.icon-password:before {
+  content: "\e65d";
+}
+
+.icon-note:before {
+  content: "\e662";
+}
+
+.icon-note1:before {
+  content: "\e6a2";
+}
+
+.icon-delete:before {
+  content: "\e67b";
+}
+
+.icon-arrow-down:before {
+  content: "\e604";
+}
+
+.icon-arrow-up:before {
+  content: "\e635";
+}
+
+.icon-arrow-right:before {
+  content: "\e603";
+}
+
+.icon-arrow-left:before {
+  content: "\ccccd";
+}
+
+.icon-star:before {
+  content: "\e602";
+}
+
+.icon-time:before {
+  content: "\e607";
+}
+
+.icon-edit:before {
+  content: "\e668";
+}
+
+.icon-add:before {
+  content: "\e601";
+}
+
+.icon-checked:before {
+  content: "\e625";
+}
+
+.icon-check:before {
+  content: "\e643";
+}
+
+.icon-close:before {
+  content: "\e610";
+}
+
+.icon-star1:before {
+  content: "\e60b";
+}
+
+.icon-picket:before {
+  content: "\e69a";
+}

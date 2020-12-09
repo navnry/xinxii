@@ -1,0 +1,630 @@
+<!-- 华贵大麦2020定期寿险   -->
+<template>
+	<view class="content">
+		<x-nav-bar no-border title="保费试算"></x-nav-bar>
+		<view class="info">
+			<view class="info-box">
+				<view class="info-box-title"><text>被保人信息</text></view>
+				<m-list-item title="被保人出生日期" tips="注：18周岁-60周岁（含18周岁,60周岁）">
+					<m-date-picker slot="right" 
+					@onConfirm="bindInsuredDateChange" 
+					:defaultValue="insuredEndDate"
+					:startDate="insuredStartDate" 
+					:endDate="insuredEndDate">
+						<text class="slot-view" v-if="insuredBirth">{{insuredBirth}}</text>
+						<text class="slot-view-placeholder" v-else>请选择</text>
+					</m-date-picker>
+				</m-list-item>
+				<m-radiobox ref="gander" @change="setGander"></m-radiobox>
+				<m-radiobox ref="isSocial" @change="setIsSocial"></m-radiobox>
+				<m-radiobox ref="occupation"></m-radiobox>
+				
+				<x-list-item title="所在地区" border='0' @click="selAddress">
+					<view slot="right">
+						<view class="slot-view" v-if="insuredRegion">{{insuredRegion}}</view>
+						<view class="slot-view-placeholder" v-else>请选择</view>
+					</view>
+				</x-list-item>
+				<x-level-picker ref="address"
+				    v-model="addressData"
+				    mode="multiSelector"
+				    cancel-color="#999"
+				    confirm-color="#ff5000"
+				    :list="areaList"
+				    :level="3"
+				    @confirm="bindRegionChange">
+				</x-level-picker>
+			</view>
+			
+			<view class="info-box">
+				<view class="info-box-title"><text>投保方案</text></view>
+				<m-radiobox ref="indemnityAmount" @change="setIndemnityAmount"></m-radiobox>
+				<m-radiobox ref="guaranteePeriod" @change="setGuaranteePeriod"></m-radiobox>
+				<m-radiobox ref="paymentType" @change="setPaymentType"></m-radiobox>
+				<m-radiobox ref="paymentPeriod" @change="setPaymentPeriod"></m-radiobox>
+			</view>
+			
+		</view>
+		<view class="reckon">
+			<view class="reckon-wrap">
+				<view class="price">
+					<text>{{resultPrice}}</text>
+					<text class="sec-text">元/年</text>
+				</view>
+				<view class="btn">
+					<button type="default" @click="toPay(detail.insuranceLink)">立即投保</button>
+				</view>
+			</view>
+		</view>
+		<x-modal ref="modal" title="您还未登录" cancelText="继续投保" confirmText="登录" content="加入新禧保险经纪，申请执业资质，认证通过后可享禧小保全平台推广费。" @cancel="insure(detail.insuranceLink)" @sure="sure" ></x-modal>
+		<x-modal ref="modal1" title="您还未成为认证经纪人" cancelText="继续投保" confirmText="立即认证" content="加入新禧保险经纪，申请执业资质，认证通过后可享禧小保全平台推广费。" @cancel="insure(detail.insuranceLink)" @sure="certification" ></x-modal>
+	</view>
+</template>
+
+<script>
+	import areaData from '@/components/x-level-picker/area-data-min.js'
+	import mRadiobox from '../../components/m-radiobox/m-radiobox.vue'
+	import mDatePicker from '../../components/m-date-picker/m-date-picker.vue'
+	import {formatTime,getAge,setStartTime,setEndTime} from '../../common/utils/index.js'
+	import { mapState } from 'vuex'
+	export default {
+		computed: {
+			...mapState(['isLogin','userinfo']),
+		},
+		components:{mRadiobox,mDatePicker},
+		data() {
+			return {
+				
+				detail:{},
+				planArr:[],//计划数组，用于判断是什么计划
+				resultPrice:'— — —',
+				timeArrA:[],//时间区间数组，用来存储时间
+				timeArrB:[],//时间区间数组，用来存储时间
+			
+				//被保人
+				insuredBirth: '',
+				insuredStartDate: '',
+				insuredEndDate: '',
+				insuredRegion:'',
+				areaList: [],
+				addressData:[],
+				province:'',
+				city:'',
+				area:'',
+				isSocial: 0 , //是否有社保仅控制最大保额，不请求
+				gander:{
+					name: '被保人性别',
+					list: [{name: "男",value: 1,checked: 0,show:true,disabled:false}, {name: "女",value: 0,checked: 0,show:true,disabled:false}]
+				},
+				isSocial:{
+					name: '是否有医保',
+					list: [{name: "是",value: 1,checked: 0,show:true,disabled:false}, {name: "否",value: 0,checked: 0,show:true,disabled:false}]
+				},
+				occupation:{
+					name:'职业类别',
+					list:[{name:'1-6类',value:'1-6类',checked: 0,show:true,disabled:true}]
+				},
+				indemnityAmount:{
+					name: '基本保额',
+					list: [{name: '10万',value: 100000,show: true,disabled:false}, {name: '20万',value: 200000,show: true,disabled:false}, 
+							{name: '30万',value: 300000,show: true,disabled:false}, {name: '40万',value: 400000,show: true,disabled:false},
+							{name: '50万',value: 500000,show: true,disabled:false}, {name: '60万',value: 600000,show: true,disabled:false},
+							{name: '70万',value: 700000,show: true,disabled:false}, {name: '80万',value: 800000,show: true,disabled:false},
+							{name: '90万',value: 900000,show: true,disabled:false}, {name: '100万',value: 1000000,show: true,disabled:false},
+							{name: '110万',value: 1100000,show: true,disabled:false}, {name: '120万',value: 1200000,show: true,disabled:false},
+							{name: '130万',value: 1300000,show: true,disabled:false}, {name: '140万',value: 1400000,show: true,disabled:false}, 
+							{name: '150万',value: 1500000,show: true,disabled:false}, {name: '160万',value: 1600000,show: true,disabled:false}, 
+							{name: '170万',value: 1700000,show: true,disabled:false}, {name: '180万',value: 1800000,show: true,disabled:false},
+							{name: '190万',value: 1900000,show: true,disabled:false}, {name: '200万',value: 2000000,show: true,disabled:false}, 
+							{name: '210万',value: 2100000,show: true,disabled:false}, {name: '220万',value: 2200000,show: true,disabled:false}, 
+							{name: '230万',value: 2300000,show: true,disabled:false}, {name: '240万',value: 2400000,show: true,disabled:false},
+							{name: '250万',value: 2500000,show: true,disabled:false}, {name: '260万',value: 2600000,show: true,disabled:false}, 
+							{name: '270万',value: 2700000,show: true,disabled:false}, {name: '280万',value: 2800000,show: true,disabled:false}, 
+							{name: '290万',value: 2900000,show: true,disabled:false}, {name: '300万',value: 3000000,show: true,disabled:false}]
+				},
+				guaranteePeriod:{
+					name: '保障期间',
+					list: [{name: '10年',value: '10',show: true,disabled:false,ageSection:[[18,60],[18,60],[18,60],[],[],[],[],[]]},
+							{name: '20年',value: '20',show: true,disabled:false,ageSection:[[18,50],[18,50],[18,50],[18,50],[],[],[],[]]}, 
+							{name: '30年',value: '30',show: true,disabled:false,ageSection:[[18,40],[18,40],[18,40],[18,40],[18,40],[],[],[]]}, 
+							{name: '至60岁',value: 'T60',show: true,disabled:false,ageSection:[[18,50],[18,50],[18,50],[18,40],[18,30],[18,50],[],[]]},
+							{name: '至65岁',value: 'T65',show: true,disabled:false,ageSection:[[18,55],[18,55],[18,55],[18,45],[18,35],[18,55],[18,55],[]]}, 
+							{name: '至70岁',value: 'T70',show: true,disabled:false,ageSection:[[18,60],[18,60],[18,60],[18,50],[18,40],[18,55],[18,60],[18,60]]}]
+				},
+				paymentType:{
+					name: '缴费类型',
+					list: [{name: '年交',value: 'NJ',show: true,disabled:false}]
+				},
+				paymentPeriod:{
+					name: '缴费年限',
+					list: [{name: '趸交',value: '趸交',show: true,disabled:false,ageSection:[[18,60],[18,50],[18,40],[18,50],[18,55],[18,60]]},
+							{name: '5年',value: '5',show: true,disabled:false,ageSection:[[18,60],[18,50],[18,40],[18,50],[18,55],[18,60]]}, 
+							{name: '10年',value: '10',show: true,disabled:false,ageSection:[[18,60],[18,50],[18,40],[18,50],[18,55],[18,60]]}, 
+							{name: '20年',value: '20',show: true,disabled:false,ageSection:[[],[18,50],[18,40],[18,40],[18,45],[18,50]]}, 
+							{name: '30年',value: '30',show: true,disabled:false,ageSection:[[],[],[18,40],[18,30],[18,35],[18,40]]}, 
+							{name: '至60岁',value: '60',show: true,disabled:false,ageSection:[[],[],[],[18,50],[18,55],[18,55]]}, 
+							{name: '至65岁',value: '65',show: true,disabled:false,ageSection:[[],[],[],[],[18,55],[18,60]]},
+							{name: '至70岁',value: '70',show: true,disabled:false,ageSection:[[],[],[],[],[],[18,60]]}]
+				},
+				
+				
+				sendData: {
+					indemnityAmount: 100000, //总保额
+					gander: '', //被保人性别
+					age: 18, //被保人年龄
+					paymentPeriod: '', //交费期限(年)
+					guaranteePeriod: '', //保障期
+					planCode: '', //计划代码
+					productCode: '', //产品代码
+					companyCode: '', //公司代码
+					exemptType: '', //豁免类型 1:被保人豁免 2：投保人豁免 空则是无豁免
+					trialType: 'Client', //保费试算类型(1.Api; 2.Client)
+					policyholderAge: '', //投保人年龄
+					policyholderGander: '', //投保人性别
+					rateType:'',
+					isSocial:'' //是否有医保
+				},
+				
+				categoryA:['北京','上海','广州','深圳','杭州','南京','宁波','苏州','成都','武汉','重庆','厦门'],
+				categoryB:[
+					'哈尔滨','长春','沈阳','呼和浩特','天津','石家庄','济南','太原','西安','兰州','乌鲁木齐','西宁',
+					'郑州','合肥','贵阳','长沙','南昌','福州','昆明','南宁','海口','天津',
+					'包头','大连','吉林','大庆','洛阳','宜昌','柳州','绵阳','遵义','芜湖',
+					'唐山','保定','沧州','廊坊','泉州','漳州','温州','嘉兴','绍兴','金华','台州','温州','嘉兴','绍兴','金华','台州',
+					'青岛','淄博','东营','烟台','潍坊','济宁','泰安','威海','临沂','德州','聊城','滨州','菏泽',
+					'无锡','徐州','常州','南通','淮安','盐城','扬州','镇江','泰州',
+					'常德','株洲',
+				]
+			}
+		},
+		mounted() {
+			this.$refs.gander.set({
+				type:'radio',			
+				title:this.gander.name,
+				index:-1,				
+				column:2,				
+				list:this.gander.list	
+			})
+			this.$refs.isSocial.set({
+				type:'radio',			
+				title:this.isSocial.name,
+				index:-1,				
+				column:2,				
+				list:this.isSocial.list	
+			})
+			this.$refs.occupation.set({
+				type:'radio',			
+				title:this.occupation.name,
+				index:-1,				
+				column:2,				
+				list:this.occupation.list	
+			})
+			this.$refs.indemnityAmount.set({
+				type:'radio',			
+				title:this.indemnityAmount.name,
+				index:-1,				
+				column:4,				
+				list:this.indemnityAmount.list	
+			})
+			this.$refs.guaranteePeriod.set({
+				type:'radio',			
+				title:this.guaranteePeriod.name,
+				index:-1,				
+				column:3,				
+				list:this.guaranteePeriod.list	
+			})
+			this.$refs.paymentType.set({
+				type:'radio',			
+				title:this.paymentType.name,
+				index:-1,				
+				column:2,				
+				list:this.paymentType.list	
+			})
+			this.$refs.paymentPeriod.set({
+				type:'radio',			
+				title:this.paymentPeriod.name,
+				index:-1,				
+				column:4,				
+				list:this.paymentPeriod.list	
+			})
+		},
+		onLoad(option) {
+			this.areaList = areaData.filter(item=>{
+				return !item.value.match(/810000|820000|710000/) //去掉港澳台
+			})
+			this.insuredStartDate = setStartTime(60) //被保人最大年龄限制
+			this.insuredEndDate = setEndTime(18) //被保人最小年龄限制
+			console.log(this.insuredStartDate,this.insuredEndDate)
+			let data = JSON.parse(decodeURIComponent(option.data))
+			this.detail = data
+			this.sendData.productCode = data.serialNumber
+			this.sendData.companyCode = data.producerCode
+			this.sendData.trialType = data.trialType
+			this.sendData.rateType = data.rateType
+			// this.getAmount()
+			
+		},
+		methods: {
+			
+			judgeCityLevel(str){ //判断城市等级
+				let reg = /城区|市|区|自治区|盟|自治州|苗族|侗族|布依族/gi
+				let output = str.replace(reg, sMatch => {
+					return sMatch.replace(/./g,"")
+				})
+				return this.categoryA.indexOf(output) !== -1 ?  1: (this.categoryB.indexOf(output) !== -1 ?  2 : 3 )
+			},
+			
+			getAmount(){/*从后台获取匹配结果*/
+				this.resultPrice = '— — —'
+				this.$api.post('pdc/product/premium.do',this.sendData).then(res=>{
+					console.log(res)
+					
+					if(res.success){
+						this.resultPrice = res.data
+					}
+				}).catch(err=>{
+					console.log(err)
+				})
+			},
+			
+			bindInsuredDateChange(e) { //被保人年龄限制,保费区间
+				let insuredAge = getAge(e.dateValue)
+				console.log(e)
+				console.log(insuredAge+'岁')
+				this.insuredBirth = e.dateValue
+				this.sendData.age = insuredAge
+				this.$refs.indemnityAmount.cancelAll();	//取消基本保额选中项
+				this.$refs.guaranteePeriod.cancelAll();	//取消保障期间选中项
+				this.$refs.paymentPeriod.cancelAll();	//取消缴费年限选中项
+				this.limitIndemnityAmount() //限制最大保额
+				this.limitTwo(insuredAge) //限制缴费年限和保障期间
+				this.getAmount()
+			},
+			
+			setGander(data){
+				// console.log('被保人'+data.value) 
+				let val = data.value
+				this.sendData.gander = val
+				this.getAmount()
+			},
+			
+			setIsSocial(data){
+				// console.log('是否有医保'+data.value) 
+				let val = data.value
+				this.isSocial = val
+				this.$refs.indemnityAmount.cancelAll();	//取消基本保额选中项
+				this.limitIndemnityAmount()
+				this.getAmount()
+			},
+			
+			setOccupation(data){
+				console.log('职业类别'+data.value) 
+				let val = data.value
+				this.getAmount()
+			},
+			
+			selAddress(){
+			    this.$refs.address.show()
+			},
+			
+			bindRegionChange(e){
+				this.province = e.item[0].label
+				this.city = e.item[1].label
+				this.area = e.item[2].label
+				this.insuredRegion = this.province+"-"+this.city+"-"+this.area
+				this.$refs.indemnityAmount.cancelAll();	//取消基本保额选中项
+				this.limitIndemnityAmount()
+			},
+			
+			setIndemnityAmount(data){
+				console.log('基本保额'+data.value) 
+				let val = data.value
+				this.sendData.indemnityAmount = val
+				this.getAmount()
+			},
+		
+			setGuaranteePeriod(data){
+				console.log('保障期间'+data.value) 
+				let val = data.value,
+					oIndex = data.index
+				this.limitPaymentPeriod(val,oIndex)
+				this.sendData.guaranteePeriod = val
+				this.getAmount()
+			},
+			
+			setPaymentType(data){
+				console.log('缴费类型'+data.value) 
+				let val = data.value
+				this.getAmount()
+			},
+			
+			setPaymentPeriod(data){
+				console.log('缴费年限'+data.value) 
+				let val = data.value,
+					oIndex = data.index
+				this.limitGuaranteePeriod(val,oIndex)
+				this.sendData.paymentPeriod =  val
+				this.getAmount()
+			},
+			
+			/**
+			 * 选择出生日期控制缴费年限和保障期间
+			 * @param {Object} val输入的年龄
+			 */
+			limitTwo(val){
+				this.guaranteePeriod.list.map(item =>{ //保障期间
+					if(val > 55){
+						item.value == '20' || item.value == '30' || item.value == 'T60' || item.value == 'T65' ?
+						item.disabled = true : item.disabled = false
+					}else if(val > 50){
+						item.value == '20' || item.value == '30' || item.value == 'T60' ?
+						item.disabled = true : item.disabled = false
+					}else if(val > 45 || val > 40){
+						item.value == '30' ?
+						item.disabled = true : item.disabled = false
+					}else{
+						item.disabled = false
+					}
+				})
+				
+				this.paymentPeriod.list.map(item =>{ //缴费期间
+					if(val > 55){
+						item.value == '趸交' || item.value == '60' || item.value == '30' || item.value == '20' ?
+						item.disabled = true : item.disabled = false
+					}else if(val > 50){
+						item.value == '趸交' || item.value == '30' || item.value == '20' ?
+						item.disabled = true : item.disabled = false
+					}else if(val > 45 || val > 40){
+						item.value == '趸交' || item.value == '30' ?
+						item.disabled = true : item.disabled = false
+					}else if(val > 35){
+						item.value == '趸交' ?
+						item.disabled = true : item.disabled = false
+					}else{
+						item.disabled = false
+					}
+				})
+			},
+			
+			/**
+			 * 限制保费封顶
+			 */
+			limitIndemnityAmount(){
+				this.sendData.indemnityAmount = 0
+				if(!this.isSocial){ //无医保
+					switch (this.judgeCityLevel(this.city)){
+						case 1:
+							this.indemnityAmount.list.map(item =>{
+								if(this.sendData.age >= 51 && this.sendData.age <=60){
+									item.value > 800000 ? item.disabled = true : item.disabled = false
+								}else if(this.sendData.age >= 41 && this.sendData.age <= 50){
+									item.value > 1500000 ? item.disabled = true : item.disabled = false
+								}else{
+									item.value > 2000000 ? item.disabled = true : item.disabled = false
+								}
+							})
+						break;
+						case 2:
+							this.indemnityAmount.list.map(item =>{
+								if(this.sendData.age >= 51 && this.sendData.age <=60){
+									item.value > 500000 ? item.disabled = true : item.disabled = false
+								}else if(this.sendData.age >= 41 && this.sendData.age <= 50){
+									item.value > 1000000 ? item.disabled = true : item.disabled = false
+								}else{
+									item.value > 1500000 ? item.disabled = true : item.disabled = false
+								}
+							})
+						break;
+						default:
+							this.indemnityAmount.list.map(item =>{
+								if(this.sendData.age >= 51 && this.sendData.age <=60){
+									item.value > 300000 ? item.disabled = true : item.disabled = false
+								}else if(this.sendData.age >= 41 && this.sendData.age <= 50){
+									item.value > 500000 ? item.disabled = true : item.disabled = false
+								}else{
+									item.value > 1000000 ? item.disabled = true : item.disabled = false
+								}
+							})
+					}
+				}else{ //有医保
+					switch (this.judgeCityLevel(this.city)){
+						case 1:
+							this.indemnityAmount.list.map(item =>{
+								if(this.sendData.age >= 51 && this.sendData.age <=60){
+									item.value > 1000000 ? item.disabled = true : item.disabled = false
+								}else if(this.sendData.age >= 41 && this.sendData.age <= 50){
+									item.value > 2500000 ? item.disabled = true : item.disabled = false
+								}else{
+									item.value > 3000000 ? item.disabled = true : item.disabled = false
+								}
+							})
+						break;
+						case 2:
+							this.indemnityAmount.list.map(item =>{
+								if(this.sendData.age >= 51 && this.sendData.age <=60){
+									item.value > 800000 ? item.disabled = true : item.disabled = false
+								}else if(this.sendData.age >= 41 && this.sendData.age <= 50){
+									item.value > 1500000 ? item.disabled = true : item.disabled = false
+								}else{
+									item.value > 2000000 ? item.disabled = true : item.disabled = false
+								}
+							})
+						break;
+						default:
+							this.indemnityAmount.list.map(item =>{
+								if(this.sendData.age >= 51 && this.sendData.age <=60){
+									item.value > 500000 ? item.disabled = true : item.disabled = false
+								}else if(this.sendData.age >= 41 && this.sendData.age <= 50){
+									item.value > 1000000 ? item.disabled = true : item.disabled = false
+								}else{
+									item.value > 1500000 ? item.disabled = true : item.disabled = false
+								}
+							})
+					}
+				}
+			},
+			
+			/**
+			 * 控制缴费年限&&保障年龄
+			 */
+			limitPaymentPeriod(val,index){
+				let tempArrA = [],
+					maxYear = ''
+				this.paymentPeriod.list.map(item => {
+					tempArrA.push(item.ageSection[index])
+					switch(val){
+						case '10':
+							item.value == '20' || item.value == '30' || item.value == '60' || item.value == '65' || item.value == '70' ?
+							item.disabled = true : item.disabled = false
+						break;
+						case '20':
+							item.value == '30' || item.value == '60' || item.value == '65' || item.value == '70' ?
+							item.disabled = true : item.disabled = false
+						break;
+						case '30':
+							item.value == '60' || item.value == '65' || item.value == '70' ?
+							item.disabled = true : item.disabled = false
+						break;
+						case 'T60':
+							item.value == '65' || item.value == '70' ?
+							item.disabled = true : item.disabled = false
+						break;
+						case 'T65':
+							item.value == '70' ?
+							item.disabled = true : item.disabled = false
+						break;
+						default:
+						item.disabled = false
+					}
+				})
+				this.timeArrA = tempArrA
+				if(this.timeArrB.length > 0){
+					maxYear = this.timeArrB[index][1]
+				}else{
+					maxYear = Math.max.apply(null,tempArrA.flat(Infinity))
+				}
+				// console.log('最大只能选择'+maxYear +'岁)
+				this.insuredStartDate = setStartTime(maxYear)
+				console.log(this.insuredStartDate)
+			},
+			
+			/**
+			 * 缴费年限控制保障期间&&保障年龄
+			 */
+			limitGuaranteePeriod(val,index){
+				let tempArrB = [],
+					maxYear = ''
+				this.guaranteePeriod.list.map(item => { //缴费年限控制保障期间&&保障年龄
+					tempArrB.push(item.ageSection[index])
+					switch(val){
+						case '70':
+							item.value == 'T65' || item.value == 'T60' || item.value == '30' || item.value == '20' || item.value == '10' ?
+							item.disabled = true : item.disabled = false
+						break;
+						case '65':
+							item.value == 'T60' || item.value == '30' || item.value == '20' || item.value == '10' ?
+							item.disabled = true : item.disabled = false
+						break;
+						case '60':
+							item.value == '30' || item.value == '20' || item.value == '10' ?
+							item.disabled = true : item.disabled = false
+						break;
+						case '30':
+							item.value == '20' || item.value == '10' ?
+							item.disabled = true : item.disabled = false
+						break;
+						case '20':
+							item.value == '10' ?
+							item.disabled = true : item.disabled = false
+						break;
+						default:
+							item.disabled = false
+					}
+				})
+				this.timeArrB = tempArrB
+				if(this.timeArrA.length > 0){
+					maxYear = this.timeArrA[index][1]
+				}else{
+					maxYear = Math.max.apply(null,tempArrB.flat(Infinity))
+				}
+				// console.log('最大只能选择'+maxYear +'岁)
+				
+				this.insuredStartDate = setStartTime(maxYear)
+				console.log(this.insuredStartDate)
+			},
+			
+			certification(){
+			    if(this.userinfo.reviewResultCode.code){
+			        this.openUrl('../join/audit?code='+this.userinfo.reviewResultCode.code+'&reason='+this.userinfo.reviewResultCode.reason)
+			    }else{
+			        this.openUrl('../join/identity')
+			    }
+			},
+			
+			/**
+			 * @param {Object} url 投保产品链接
+			 */
+			toPay(url){
+			    // #ifndef H5
+			    if(!this.isLogin){
+			    	this.$refs.modal.open()
+			        return
+			    }else{
+			        if(this.userinfo.reviewResultCode&&this.userinfo.reviewResultCode.code==5){
+			            this.insure(url)
+			        }else{
+			            this.$refs.modal1.open()
+			        }
+			    }
+			    // #endif
+			    // #ifdef H5
+			    this.insure(url)
+			    // #endif
+			    
+			},
+			
+			/**
+			 * 
+			 * @param {Object} url投保产品链接
+			 */
+			insure(url){
+			    let data = {
+			        url,
+			        type: this.detail.insuranceType,
+			        linkType: this.detail.linkType,
+			        name:this.detail.producerName
+			    }
+			    uni.navigateTo({
+			        url: '../ebook/productnotify?data=' + encodeURIComponent(JSON.stringify(data))
+			    })
+			},
+			sure(){
+				this.openUrl('../my/login')
+			},
+		},
+	}
+</script>
+
+<style lang="less">
+	.content{padding: 0 24rpx 170rpx;}
+	.info-box{padding: 24rpx;
+		background-color: #FFFFFF;margin-top: 24rpx;border-radius: 12rpx;
+		.x-cont{padding: 0;
+			.slot-view-placeholder{color: #999999;}
+		}
+		.info-box-title{position: relative;display: flex;align-items: center;margin-bottom: 48rpx;
+			&::before{content: "";display: block;width: 6rpx;height: 34rpx;background: #FF5000;border-radius: 3rpx;margin-right: 8rpx;}
+			>text{font-size: 36rpx;font-weight: 500;line-height: 50rpx;}
+		}
+	}
+	.reckon{position: fixed;bottom: 0;left: 0;;width: 100%;height: 120rpx;background: #FFFFFF;border-top: 2rpx solid #EBEDF0;padding: 16rpx 24rpx;
+		.reckon-wrap{display: flex;align-items: center;justify-content: space-between;
+			.price{flex: 1;margin-right: 24rpx;color: #FF5000;font-size: 48rpx;
+				.sec-text{font-size: 28rpx;font-weight: 400;line-height: 40rpx;margin-left: 4rpx;}
+			}
+			.btn{
+				button{width: 232rpx;height: 88rpx;background: #FF5000;border-radius: 6rpx;font-size: 34rpx;font-weight: 500;color: #FFFFFF;line-height: 88rpx;}
+			}
+		}
+	}
+</style>

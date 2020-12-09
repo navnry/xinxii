@@ -1,0 +1,51 @@
+<template>
+  <view class="insurance-item" @click="openUrl('../product/detail?id='+item.id)">
+    <view class="img-box">
+      <image class="img" lazy-load :src="item.pictures+'?imageView2/1/w/240/h/148'" mode="aspectFill"></image>
+    </view>
+    <view class="detail">
+      <view class="info">
+        <view class="tit">{{item.name}}</view>
+        <view class="label">
+          <text class="txt" v-for="i in item.tags" :key="i.id">{{i.name}}</text>
+        </view>
+      </view>
+      <view class="price">{{item.inPrice.toFixed(2)}} <text class="txt">元/起</text></view>
+    </view>
+  </view>
+</template>
+
+<script>
+  export default{
+    props:{
+        item: {
+            type: Object
+        }
+    }
+  }
+</script>
+
+<style lang="less" scoped>
+.text-line(@num: 2) { overflow: hidden; word-break: break-all; -webkit-line-clamp: @num; -webkit-box-orient: vertical; display: -webkit-box; }
+.insurance-item{display: flex; margin-bottom: 24rpx;
+    .img-box{font-size: 0; flex-shrink: 0; margin-right: 12rpx;
+      .img{width: 240rpx; height: 148rpx;border-radius: 8rpx;}
+    }
+    .detail{flex: 1; display: inline-flex; flex-direction: column; justify-content: space-between;overflow: hidden;
+        .info{
+			.tit{font-size: 32rpx; line-height: 44rpx; font-weight: bold; margin-bottom: 8rpx; .text-line(1);}
+			.label{font-size: 24rpx; color: #666; line-height: 34rpx;white-space: nowrap;overflow: hidden;text-overflow:ellipsis;
+			    .txt{position: relative; 
+					&::after{content: '|'; margin: 0 12rpx;line-height: 34rpx;vertical-align: text-bottom;}
+					&:last-of-type{
+					    &::after{display: none;}
+					}
+			    }
+			}
+        }
+        .price{color: #FF5000; font-size: 40rpx; font-weight: bold; line-height: 52rpx;
+			.txt{margin-left: 10rpx; font-size: 24rpx; font-weight: normal; line-height: 34rpx;}
+        }
+    }
+}
+</style>

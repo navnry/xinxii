@@ -1,0 +1,43 @@
+<template>
+    <view class="content">
+        <x-nav-bar :no-border="true" title="精英训练营"></x-nav-bar>
+        <view class="img-box">
+            <image src="../../static/home_join_bg.png" mode=""></image>
+            <view class="btn"  @click="join">加入新禧</view>
+        </view>
+    </view>
+</template>
+
+<script>
+    import { mapState } from 'vuex'
+    export default {
+        computed: mapState(['userinfo','isLogin']),
+        data(){
+            return{
+                
+            }
+        },
+        methods:{
+            join(){
+                if(!this.isLogin){
+                    this.showModel('您还未登录','是否立即去登录？',()=>{
+                        this.openUrl('./login')
+                    })
+                    return
+                }
+                if(this.userinfo.reviewResultCode.code){
+                    this.openUrl('../join/audit?code='+this.userinfo.reviewResultCode.code+'&reason='+this.userinfo.reviewResultCode.reason)
+                }else{
+                    this.openUrl('../join/identity')
+                }
+            }
+        }
+    }
+</script>
+
+<style lang="less" scoped>
+    .img-box{font-size: 0;
+        image{width: 750rpx; height: 4358rpx;}
+        .btn{width: 630rpx; height: 88rpx; line-height: 88rpx; text-align: center; background: #fff; border-radius: 4rpx; left: 58rpx; bottom: 48rpx; font-size: 32rpx; color: #ff5000; position: fixed; bottom: 40rpx;}
+    }
+</style>
